@@ -15,7 +15,7 @@ mqtt_topic = 'SIT764/projectEcho'
 # Connect to the MQTT broker
 client = mqtt.Client("Client")
 
-client.username_pw_set("username", "password")
+client.username_pw_set("Username", "nn,mnasd,fmnasdf")
 
 def on_connect(client, userdata, flags, rc):
     print('Connected to broker')
