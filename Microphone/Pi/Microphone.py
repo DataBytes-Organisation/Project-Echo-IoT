@@ -1,89 +1,104 @@
 import pyaudio
 import wave
 import time
-import threading
-from gpiozero import Button
 
-form_1 = pyaudio.paInt16 # 16-bit resolution
-chans = 1 # 1 channel
-samp_rate = 44100 # 44.1kHz sampling rate
-chunk = 4096 # 2^12 samples for buffer
-record_secs = 5 # seconds to record
-dev_index = 1 # device index found by p.get_device_info_by_index(ii)
-fileNumber = 0
-wav_output_filename = 'test1.wav' # name of .wav file
-audio = pyaudio.PyAudio() # create pyaudio instantiation
-recording = False
 
-def fileName():
-    fileNumber = time.time()
-    fileNumber = str(fileNumber).replace(".","_")
-    fileName = 'EchoRecording'+ fileNumber +'.wav'
-    return(fileName)
 
-def saveFile():
-    # save the audio frames as .wav file
-    wavefile = wave.open(wav_output_filename,'wb')
-    wavefile.setnchannels(chans)
-    wavefile.setsampwidth(audio.get_sample_size(form_1))
-    wavefile.setframerate(samp_rate)
-    wavefile.writeframes(b''.join(frames))
-    wavefile.close()
+class echoMicrophone:
+    form_1 = pyaudio.paInt16 # 16-bit resolution
+    chans = 1 # 1 channel
+    samp_rate = 44100 # 44.1kHz sampling rate
+    chunk = 4096 # 2^12 samples for buffer
+    record_secs = 5 # seconds to record
+    dev_index = 1 # device index found by p.get_device_info_by_index(ii)
+    #fileNumber = 0
+    #wav_output_filename = 'test1.wav' # name of .wav file
+    audio = pyaudio.PyAudio() # create pyaudio instantiation
+    stream = 0
+    recording = True
 
-def recordingEnableButton():
-    button = Button(2)
-    global recording
-    while(True):
-        button.wait_for_press()
-        time.sleep(0.5)
-        if(recording):
-            recording = False
-        else:
-            recording = True
-        print(recording)
-
-        
+    def __init__(resolution = pyaudio.paInt16, no_channels = 1, sample_rate = 44100, chunk = 4096,
+    recording_time = 2, device_index = 1, ):
+        self.form_1 = resolution
+        self.chans = no_channels
+        self.samp_rate = samp_rate
+        self.chunk = chunk
+        self.record_secs = recording_time
+        self.dev_index = device_index
         
 
 
+    def fileName(self):
+        fileNumber = time.time()
+        fileNumber = str(fileNumber).replace(".","_")
+        fileName = 'EchoRecording'+ fileNumber +'.wav'
+        return(fileName)
+
+    def saveFile(self,wav_output_filename,frames):
+        # save the audio frames as .wav file
+        wavefile = wave.open(wav_output_filename,'wb')
+        wavefile.setnchannels(self.chans)
+        wavefile.setsampwidth(self.audio.get_sample_size(self.form_1))
+        wavefile.setframerate(self.samp_rate)
+        wavefile.writeframes(b''.join(frames))
+        wavefile.close()
 
 
-    # create pyaudio stream
-stream = audio.open(format = form_1,rate = samp_rate,channels = chans, \
-                        input_device_index = dev_index,input = True, \
-                        frames_per_buffer=chunk)
+    
+    def init_stream(self):
+        self.stream = self.audio.open(format = self.form_1,rate = self.samp_rate,channels = self.chans, \
+                                input_device_index = self.dev_index,input = True, \
+                                frames_per_buffer= self.chunk)
+    
+    def stop_stream(self):
 
-t1 = threading.Thread(target =recordingEnableButton)
-t1.start()
-try:
-    while(True):
-        if(recording):
-            try:
-                stream.start_stream()
-                print("recording")
-                frames = []
+            self.stream.stop_stream()
+            self.stream.close()
+            self.audio.terminate()
 
-                # loop through stream and append audio chunks to frame array
-                for ii in range(0,int((samp_rate/chunk)*record_secs)):
-                    data = stream.read(chunk)
-                    frames.append(data)
+    def stop_recording(self):
+        self.recording = False   
+    
+    def re_start_recording(self):
+        self.recording = True
 
-                print("finished recording")
+            
+            
+    def startRecording(self):
+                # create pyaudio stream
+        self.init_stream(self)
 
-                wav_output_filename = fileName()
-                # stop the stream, close it, and terminate the pyaudio instantiation
-                saveFile()
-                stream.stop_stream()
-            except OSError:
-                print("OS error caught")
-                stream.close()
-                audio.terminate()
-                audio = pyaudio.PyAudio()
-                stream = audio.open(format = form_1,rate = samp_rate,channels = chans, \
-                                input_device_index = dev_index,input = True, \
-                                frames_per_buffer=chunk)
-finally:
-    stream.stop_stream()
-    stream.close()
-    audio.terminate()
-    t1.join()
+ 
+        try:
+            while(True):
+                if(self.recording):
+                    try:
+                        self.stream.start_stream()
+                        print("recording")
+                        frames = []
+
+                        # loop through stream and append audio chunks to frame array
+                        for ii in range(0,int((self.samp_rate/self.chunk)*self.record_secs)):
+                            data = self.stream.read(self.chunk)
+                            frames.append(data)
+
+                        print("finished recording")
+                        # stop the stream, close it, and terminate the pyaudio instantiation
+                        self.saveFile( self,self.fileName(self),frames)
+                        self.stream.stop_stream()
+                    except OSError:
+                        try:
+                       
+                            print("OS error caught")
+                            self.stop_stream(self)
+                            self.audio = pyaudio.PyAudio()
+                            self.init_stream(self)
+                            self.stream.start_stream()
+                        except OSError:
+                            self.audio = pyaudio.PyAudio()
+                            self.init_stream(self)
+                            self.stream.start_stream()
+
+
+        finally:
+            self.stop_stream(self)
