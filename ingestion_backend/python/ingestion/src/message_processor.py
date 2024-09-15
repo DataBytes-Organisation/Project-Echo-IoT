@@ -5,6 +5,7 @@ It's purpose is to receive a message from an MQTT topic to process.
 
 from paho.mqtt.client import MQTTMessage
 
+# pylint: disable-next=too-few-public-methods
 class MessageProcessor:
     """
     This class processes messages from the IOT backend ingestion broker.

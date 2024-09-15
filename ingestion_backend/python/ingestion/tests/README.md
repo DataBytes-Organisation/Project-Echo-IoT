@@ -1,0 +1,1 @@
+Pytest is expected to be called from the ingestion folder

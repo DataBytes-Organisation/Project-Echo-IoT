@@ -32,7 +32,7 @@ class BuilderAbstract(ABC):
         Returns:
             None
         """
-    
+
     @abstractmethod
     def get(self, **kwargs) -> Any:
         """
@@ -58,7 +58,7 @@ class BuilderBase(BuilderAbstract):
     """
     def __init__(self):
         self.result = None
-    
+
     @abstractmethod
     def build(self, **kwargs) -> None:
         pass
