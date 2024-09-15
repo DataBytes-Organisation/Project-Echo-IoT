@@ -10,8 +10,6 @@ It is used for storing code & config common to all pytest tests for the directio
 https://www.geeksforgeeks.org/conftest-in-pytest/
 
 """
-from typing import Callable
-
 import pytest
 
 @pytest.fixture(name="hello_world", scope="function")
