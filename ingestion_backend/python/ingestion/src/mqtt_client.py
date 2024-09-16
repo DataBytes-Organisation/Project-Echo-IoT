@@ -22,7 +22,8 @@ class OnConnectCallbackBuilder(BuilderBase):
     """
     Builds callback callable used as on_connect callback on Paho MQTT client.
     """
-    def build(self, topic: str) -> None:
+    # pylint: disable-next=arguments-differ
+    def build(self, topic: str) -> None: # type: ignore
         """
         Builds callback callable used as on_connect callback on Paho MQTT client.
 
@@ -70,7 +71,8 @@ class OnMessageCallbackBuilder(BuilderBase):
     """
     Builds callback callable used as on_message callback on Paho MQTT client.
     """
-    def build(self) -> None:
+    # pylint: disable-next=arguments-differ
+    def build(self) -> None: # type: ignore
         """
         Builds callback callable used as on_message callback on Paho MQTT client.
 
@@ -112,7 +114,8 @@ class MQTTClientBuilder(BuilderBase):
     This builder builds an instance of paho.mqtt.client.Client connected to the
     IOT ingestion backend.
     """
-    def build(
+    # pylint: disable-next=arguments-differ
+    def build( # type: ignore
             self,
             user_name: str,
             password: str,
@@ -134,7 +137,7 @@ class MQTTClientBuilder(BuilderBase):
         client: mqtt.Client = mqtt.Client(
             client_id=CLIENT_ID,
             callback_api_version=mqtt.CallbackAPIVersion.VERSION2,
-            transport=CLIENT_TRANSPORT,
+            transport=CLIENT_TRANSPORT, # type: ignore
             protocol=mqtt.MQTTv5
         )
 

@@ -60,7 +60,7 @@ class BuilderBase(BuilderAbstract):
         self.result = None
 
     @abstractmethod
-    def build(self, **kwargs) -> None:
+    def build(self, **kwargs: Any) -> None:
         pass
 
     def get(self, **kwargs) -> Any:

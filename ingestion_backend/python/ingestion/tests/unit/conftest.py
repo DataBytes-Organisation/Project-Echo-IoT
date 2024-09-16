@@ -10,6 +10,9 @@ It is used for storing code & config common to all pytest tests for the directio
 https://www.geeksforgeeks.org/conftest-in-pytest/
 
 """
+
+from typing import Dict
+
 import pytest
 
 @pytest.fixture(name="hello_world", scope="function")
@@ -25,3 +28,12 @@ def hello_world() -> str:
             hello world.
     """
     return "hello world"
+
+@pytest.fixture(name="app_kwargs", scope="function")
+def get_app_kwargs() -> Dict[str, str]:
+    return {
+        "endpoint": "https://dummyendpointurl",
+        "topic": "dummytopic",
+        "user_name": "dummyuser",
+        "password": "dummypassword"
+    }
