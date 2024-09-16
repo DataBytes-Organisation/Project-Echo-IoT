@@ -16,7 +16,7 @@ from .message_processor import MessageProcessor
 CLIENT_ID = "python_ingestion_backend1"
 CLIENT_TRANSPORT = "websockets"
 SESSION_EXPIRY_INTERVAL = 30 * 60
-
+LOCALHOST = "localhost"
 
 class OnConnectCallbackBuilder(BuilderBase):
     """
@@ -41,7 +41,7 @@ class OnConnectCallbackBuilder(BuilderBase):
                 flags: ConnectFlags,
                 reason_code: ReasonCode,
                 properties: Properties
-            ) -> None:
+        ) -> None:
             """
             Callback set as on_callback property on Paho MQTT client.
             See https://eclipse.dev/paho/files/paho.mqtt.python/html/client.html#paho.mqtt.client
@@ -143,17 +143,22 @@ class MQTTClientBuilder(BuilderBase):
 
         client.on_connect = OnConnectCallbackBuilder().get(topic=topic)
         client.on_message = OnMessageCallbackBuilder().get()
-        client.tls_set()
         client.username_pw_set(
             username=user_name,
             password=password
         )
 
+        if endpoint == LOCALHOST:
+            port = 9001
+        else:
+            client.tls_set()
+            port = 443
+
         properties: Properties = Properties(PacketTypes.CONNECT)
         properties.SessionExpiryInterval = SESSION_EXPIRY_INTERVAL # in seconds
 
         client.connect(endpoint,
-            port=443,
+            port=port,
             clean_start=mqtt.MQTT_CLEAN_START_FIRST_ONLY,
             properties=properties,
             keepalive=30

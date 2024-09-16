@@ -13,7 +13,7 @@ from src.app_logging import LogConfigurator
 from src.constants import LOGGER_NAME
 from src.mqtt_client import MQTTClientBuilder
 
-LOGGER = logging.getLogger(LOGGER_NAME + "." + __name__)
+LOGGER = logging.getLogger(LOGGER_NAME)
 LogConfigurator.configure_logger(LOGGER)
 
 ENDPOINT_ENV_VAR = "IOT_ENDPOINT"
