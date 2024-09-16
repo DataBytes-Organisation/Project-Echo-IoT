@@ -1,11 +1,12 @@
 """
+This module contains pytest unit tests for ingestion.src.mqtt_client
 """
 
 from typing import Dict
 from unittest.mock import patch, Mock
 
-from ingestion.src.mqtt_client import MQTTClientBuilder, OnConnectCallbackBuilder,\
-    OnMessageCallbackBuilder
+from ingestion.src.mqtt_client import MQTTClientBuilder
+
 
 ###############################################################################################
 # MQTTClientBuilder tests
@@ -13,6 +14,11 @@ from ingestion.src.mqtt_client import MQTTClientBuilder, OnConnectCallbackBuilde
 
 def test_mqttclientbuilder_build(app_kwargs: Dict[str, str]):
     """
+    Tests MQTTClientBuilder calls the appropriate methods to build the MQTT client.
+
+    Arguments:
+        app_kwargs: Dict[str, str]
+            Pytest fixture containing application arguments.
     """
     client_mock: Mock = Mock()
     client_mock.connect = Mock()

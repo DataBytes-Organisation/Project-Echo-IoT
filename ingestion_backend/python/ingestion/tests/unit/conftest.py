@@ -31,6 +31,13 @@ def hello_world() -> str:
 
 @pytest.fixture(name="app_kwargs", scope="function")
 def get_app_kwargs() -> Dict[str, str]:
+    """
+    Pytest fixture that provides application testing arguments.
+
+    Returns:
+        Dict[str, str]
+            Dict with application testing arguments.
+    """
     return {
         "endpoint": "https://dummyendpointurl",
         "topic": "dummytopic",

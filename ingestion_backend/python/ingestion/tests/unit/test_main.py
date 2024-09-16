@@ -3,24 +3,25 @@ This module contains pytest unit tests for src.main.py
 """
 
 import os
+from typing import Dict
 from unittest.mock import patch, Mock
 
-from ingestion.src.main import main, IOTIngestion, ENDPOINT, TOPIC, USER_ENV_VAR, USER_PASS_ENV_VAR
+from ingestion.src.main import main, IOTIngestion, ENDPOINT_ENV_VAR, TOPIC_ENV_VAR, USER_ENV_VAR,\
+    USER_PASS_ENV_VAR
+
 
 ###############################################################################################
 # IOTIngestion tests
 ###############################################################################################
 
-def test_iotingestion_run():
+def test_iotingestion_run(app_kwargs: Dict[str, str]):
     """
     Tests IOTIngestion runs and creates client with the correctly passed variables.
-    """
-    # vars to test with
-    test_endpoint: str = "https://dummyendpointurl",
-    test_topic: str = "dummytopic",
-    test_user: str = "dummyuser"
-    test_password: str = "dummypassword"
 
+    Arguments:
+        app_kwargs: Dict[str, str]
+            Pytest fixture containing application arguments.
+    """
     mock_builder: Mock = Mock()
     mock_client: Mock = Mock()
     mock_client.username_pw_set = Mock()
@@ -28,22 +29,18 @@ def test_iotingestion_run():
 
     with patch("ingestion.src.main.MQTTClientBuilder", return_value=mock_builder):
         app: IOTIngestion = IOTIngestion(
-            test_endpoint,
-            test_topic,
-            test_user,
-            test_password
+            **app_kwargs
         )
         app.run()
 
         # assert builder called with correct vars
         mock_builder.get.assert_called_with(
-            endpoint = test_endpoint,
-            topic = test_topic,
-            user_name = test_user,
-            password = test_password
+            **app_kwargs
         )
         # asssert loop forever called
+        # pylint: disable-next=no-member
         app.client.loop_forever.assert_called()
+
 
 ###############################################################################################
 # main (function) tests
@@ -51,7 +48,12 @@ def test_iotingestion_run():
 
 @patch.dict(
         os.environ,
-        {USER_ENV_VAR: "dummyuser", USER_PASS_ENV_VAR: "dummypassword"},
+        {
+            ENDPOINT_ENV_VAR: "https://dummyendpoint.com",
+            TOPIC_ENV_VAR: "dummytopic",
+            USER_ENV_VAR: "dummyuser",
+            USER_PASS_ENV_VAR: "dummypassword"
+        },
         clear=True
 )
 def test_main():
@@ -67,8 +69,8 @@ def test_main():
     ) as iotingestion_call:
         main()
         iotingestion_call.assert_called_with(
-            endpoint = ENDPOINT,
-            topic = TOPIC,
+            endpoint = os.environ[ENDPOINT_ENV_VAR],
+            topic = os.environ[TOPIC_ENV_VAR],
             user_name = os.environ[USER_ENV_VAR],
             password = os.environ[USER_PASS_ENV_VAR]
         )

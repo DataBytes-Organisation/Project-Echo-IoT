@@ -47,6 +47,7 @@ class BuilderAbstract(ABC):
                 Implementing classes can override to provide a more specific type.
         """
 
+
 class BuilderBase(BuilderAbstract):
     """
     Intended to be inherited by most specific builder implementations.
