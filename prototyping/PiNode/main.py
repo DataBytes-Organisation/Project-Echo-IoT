@@ -17,7 +17,7 @@ image_id = 1
 
 def split_and_insert(image_bytes, database):
 
-    size_pieces = 220
+    size_pieces = 200
     for i in range(len(image_bytes) // size_pieces):
         piece = image_bytes[i * size_pieces:(i * size_pieces) + size_pieces]
         # print(f"{i} piece is {len(piece)} bytes:  {i * size_pieces} to {(i * size_pieces) + size_pieces}")

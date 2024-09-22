@@ -16,7 +16,7 @@ class Receiver:
 
         # Do something when you receive a message
         # Check Byte
-        incoming_payload = payload.decode().split('|')
+        incoming_payload = payload[:3].decode().split('|')
 
         # NEW HEADER HAS ARRIVED
         if int(incoming_payload[0]) == 1:
@@ -29,11 +29,15 @@ class Receiver:
 
 
         if int(incoming_payload[0]) == 3:
-            print("New Piece arrived")
-            node_id = int(incoming_payload[1])
-            image_id = int(incoming_payload[2])
-            piece_id = int(incoming_payload[3])
-            piece = bytes(incoming_payload[4], encoding='utf8')
+            print("New Piece arrived which is partially raw bytes")
+
+            further_decoded = payload[:14].decode().split('|')
+
+
+            node_id = int(further_decoded[1])
+            image_id = int(further_decoded[2])
+            piece_id = int(further_decoded[3])
+            piece = payload[14:]
 
             print(node_id, image_id, piece_id, piece)
             self.database.insert_a_piece(node_id, image_id, piece_id, piece)

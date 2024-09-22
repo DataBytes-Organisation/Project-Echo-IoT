@@ -42,7 +42,7 @@ class Sender:
                     # image_bytes += piece[3]
                     print(piece)
                 print(len(image_bytes))
-            time.sleep(2)
+            time.sleep(.1)
 
 
 
