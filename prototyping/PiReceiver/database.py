@@ -70,3 +70,33 @@ class Database:
         for row in self.cursor.execute('SELECT * FROM Pieces WHERE Node_id = (?) and Image_id = (?)', (node_id,image_id)):
             pieces.append(row)
         return pieces
+
+
+    def get_unique_image_ids(self):
+
+        #simply return a list of unique image ids
+        self.connect()
+
+        image_ids = []
+
+        for row in self.cursor.execute('SELECT DISTINCT Image_id FROM Pieces WHERE Image_id is NOT NULL;'):
+            image_ids.append(row[0])
+        return image_ids
+
+    def image_complete(self, image_id):
+
+        self.connect()
+
+        for row in self.cursor.execute('SELECT CASE WHEN COUNT(*) = COUNT(CASE WHEN received = 1 THEN 1 END) THEN 1 ELSE 0 END AS all_received FROM Pieces WHERE Image_id = ?;',(image_id,)):
+            return row[0]
+
+        return False
+
+    def delete_image(self, image_id):
+
+        self.connect()
+        self.cursor.execute(
+            'DELETE from Pieces WHERE Image_id = (?)',(image_id,))
+        self.connection.commit()
+
+

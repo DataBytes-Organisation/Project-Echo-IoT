@@ -14,8 +14,6 @@ class Sender:
 
     def send_message(self, payload):
 
-        print(f"sending {payload}")
-
         comms.send_message("udp://127.0.0.1:61667", payload)
 
 
@@ -43,23 +41,20 @@ class Sender:
 
             if requested is not None:
 
-                print(requested[2])
-                print(len(requested[2]))
-
-                print(str(requested[2]))
                 node_id = 1
-                padded_string = f'{int(requested[0]):05}'
-                prefix = '3'+'|'+ str(node_id) +'|'+padded_string+'|'+str(requested[1]) + '|'
+                padded_image_id = f'{int(requested[0]):05}'
+                padded_piece_id = f'{int(requested[1]):05}'
+                prefix = '3'+'|'+ str(node_id) +'|'+padded_image_id+'|'+padded_piece_id + '|'
                 byte_prefix = prefix.encode('utf-8')
-                print(len(byte_prefix))
+                # print(len(byte_prefix))
                 payload = byte_prefix + requested[2]
-                # payload = '3'+'|'+ str(node_id) +'|'+str(requested[0])+'|'+str(requested[1]) + '|'+(requested[2])
+
                 self.send_message(payload)
 
                 #also, now we sent it, you can mark it as request fulfilled
                 self.database.reset_request(str(requested[0]), str(requested[1]))
 
-            time.sleep(.1)
+            time.sleep(.2)
 
 
 

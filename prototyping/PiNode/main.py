@@ -1,38 +1,70 @@
 import multiprocessing
 import time
-from PIL import Image
+import glob, os, shutil
 
 
 #Project imports
 import battery, recorder
 import database, receiver, comms, sender
 
-def wait_while():
+
+
+
+def wait_while(database):
     # This is the parent process, which currently doesn't do much, except wait while other processes are running
     # If we don't let it sleep, it'll max out CPU while running very fast for no reason.
+
+    # check for new files
+    filename = check_for_jpg("")
+    if filename:
+        file_id = os.path.splitext(os.path.basename(filename))[0]
+        split_and_insert(201, database, filename, int(file_id))
+
     time.sleep(10)
 
 # Temp assignment of image id
-image_id = 1
+image_id = 2
 
-def split_and_insert(image_bytes, database):
 
-    size_pieces = 200
-    for i in range(len(image_bytes) // size_pieces):
-        piece = image_bytes[i * size_pieces:(i * size_pieces) + size_pieces]
-        # print(f"{i} piece is {len(piece)} bytes:  {i * size_pieces} to {(i * size_pieces) + size_pieces}")
+def check_for_jpg(directory_path):
 
-        database.insert_piece(piece, i, image_id)
+    jpg_files = glob.glob(os.path.join(directory_path, "*.jpg"))
 
-    # Still need the last partial chunk
-    i += 1
-    piece = image_bytes[i * size_pieces:-1]
-    # print(f"{i} piece is {len(piece)} bytes:  {i * size_pieces} to {len(image_bytes)}")
-    database.insert_piece(piece, i, image_id)
+    if jpg_files:
+        print(f"New detection found: {jpg_files[0]}")
+        return jpg_files[0]
+    else:
+        return False
+
+
+def move_file(filename):
+    destination_directory = 'processed'
+    file_name = os.path.basename(filename)
+    destination_file_path = os.path.join(destination_directory, file_name)
+
+    shutil.move(file_name, destination_file_path)
+
+def split_image(image_path, size_of_chunks):
+    with open(image_path, 'rb') as file:
+        data = file.read()
+    chunks = [data[i:i+size_of_chunks] for i in range(0, len(data), size_of_chunks)]
+    return chunks
+def split_and_insert(size_pieces, database, image_path, image_id):
+
+
+    #get chunks from the file
+    chunks = split_image(image_path, size_pieces)
+
+    for i,chunk in enumerate(chunks):
+        database.insert_piece(chunk, i, image_id)
 
     #We know the number of pieces, so build our header, which is automatically sent to the Gateway
     header = (image_id, i)
     database.insert_header(header)
+
+    #Move file to processed directory
+    move_file(image_path)
+
 
 
 if __name__ == '__main__':
@@ -63,15 +95,10 @@ if __name__ == '__main__':
     #Now we can connect to database
     database.connect()
 
-    # Testing splitting and joining large files
-    #Generate a large split file from an image
 
-    image_bytes = Image.open('image.jpg').tobytes()
 
-    #split into pieces and generate header
-    split_and_insert(image_bytes, database)
 
 
 
     while True:
-        wait_while()
+        wait_while(database)
