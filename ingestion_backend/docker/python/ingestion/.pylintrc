@@ -1,0 +1,6 @@
+[MAIN]
+# when pylint score below 8 fail the pipeline
+fail-under=8.0
+init-hook="import os, sys; sys.path.append(os.getcwd())"
+[MESSAGES CONTROL]
+disable=too-few-public-methods
