@@ -5,28 +5,25 @@ import glob, os, shutil
 
 #Project imports
 import battery, recorder
-import database, receiver, comms, sender
+import database, lora_sender_receiver, comms
 
-
-
+#number of bytes per chunk, needs to adhere to lora guidelines
+FILE_CHUNK_SIZE = 100
 
 def wait_while(database):
     # This is the parent process, which currently doesn't do much, except wait while other processes are running
     # If we don't let it sleep, it'll max out CPU while running very fast for no reason.
 
     # check for new files
-    filename = check_for_jpg("")
+    filename = check_for_file("")
     if filename:
         file_id = os.path.splitext(os.path.basename(filename))[0]
-        split_and_insert(201, database, filename, int(file_id))
+        split_and_insert(FILE_CHUNK_SIZE, database, filename, int(file_id))
 
     time.sleep(10)
 
-# Temp assignment of image id
-image_id = 2
 
-
-def check_for_jpg(directory_path):
+def check_for_file(directory_path):
 
     jpg_files = glob.glob(os.path.join(directory_path, "*.jpg"))
 
@@ -49,6 +46,7 @@ def split_image(image_path, size_of_chunks):
         data = file.read()
     chunks = [data[i:i+size_of_chunks] for i in range(0, len(data), size_of_chunks)]
     return chunks
+
 def split_and_insert(size_pieces, database, image_path, image_id):
 
 
@@ -59,7 +57,7 @@ def split_and_insert(size_pieces, database, image_path, image_id):
         database.insert_piece(chunk, i, image_id)
 
     #We know the number of pieces, so build our header, which is automatically sent to the Gateway
-    header = (image_id, i)
+    header = (image_id, i, image_path)
     database.insert_header(header)
 
     #Move file to processed directory
@@ -71,15 +69,14 @@ if __name__ == '__main__':
 
     # Initialise all the individual process classes
     database = database.Database()
-    receiver = receiver.Receiver(database)
-    sender = sender.Sender(database)
+
+    lora = lora_sender_receiver.LoraSenderReceiver(database)
 
     # Add the recorder class and the battery class as placeholders
     recorder = recorder.Recorder(database)
     battery_monitor = battery.Battery(database)
 
-    sender_process = multiprocessing.Process(target=sender.sender_thread,daemon=True,name="SenderProcess")
-    receiver_process = multiprocessing.Process(target=receiver.receiver_thread, daemon=True, name="ReceiverProcess")
+    lora_process = multiprocessing.Process(target=lora.lora_thread,daemon=True,name="SenderProcess")
 
     # Spawn placeholder sub processes
     recorder_process = multiprocessing.Process(target=recorder.recorder_thread, daemon=True, name="RecorderProcess")
@@ -87,16 +84,13 @@ if __name__ == '__main__':
 
 
     #Start the processes (Before opening connection to database)
-    receiver_process.start()
-    sender_process.start()
+
+    lora_process.start()
     recorder_process.start()
     battery_monitor_process.start()
 
     #Now we can connect to database
     database.connect()
-
-
-
 
 
 

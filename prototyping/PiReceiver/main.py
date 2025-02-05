@@ -2,7 +2,7 @@ import multiprocessing
 import time
 from PIL import Image
 
-import database, receiver, comms, sender
+import database, lora_sender_receiver, comms, sender
 
 def wait_while():
 
@@ -12,15 +12,15 @@ def wait_while():
 if __name__ == '__main__':
 
     database = database.Database()
-    receiver = receiver.Receiver(database)
-    sender = sender.Sender(database)
+    receiver = lora_sender_receiver.Receiver(database)
+    # sender = sender.Sender(database)
 
-    sender_process = multiprocessing.Process(target=sender.sender_thread,daemon=True,name="SenderProcess")
+    # sender_process = multiprocessing.Process(target=sender.sender_thread,daemon=True,name="SenderProcess")
     receiver_process = multiprocessing.Process(target=receiver.receiver_thread, daemon=True, name="ReceiverProcess")
 
     receiver_process.start()
 
-    sender_process.start()
+    # sender_process.start()
 
     database.connect()
 
