@@ -1,0 +1,30 @@
+Currently this code has not been tested
+Gps_reader.py:
+This file will allow the gps module GY-NEO6MV2 to connect to the raspberry pi using UART(Universal Asynchronous Receiver-Transmitter)
+
+It has not been tested and may require fine tuning before deployment in the field
+
+Before use the commands to download the required dependencies are 
+sudo apt-get install python3-pip
+pip3 install pynmea2
+
+Testing command:
+python3 gps_reader.py
+
+The code reads NMEA sentences over /dev/serial0 (Pi’s UART interface).
+
+It parses $GPGGA and $GPRMC sentences using the pynmea2 library to extract timestamp, latitude, and longitude.
+
+Gps_movement.py:
+The gps movement file is a feature to trigger a notification if movement has been detected by the module
+The movement will be measured in meters as there may be slight movements due to environmental forces
+It uses the Havershine formula to measure and detected distance moved.
+
+This has not been tested and is a potential concept which should be implemented in the gps_reader.py file
+
+Some of it's features are:
+Read latitude and longitude every few seconds.
+
+Calculate the distance between the current location and the previous location.
+
+If the distance exceeds a defined threshold (e.g., 2 meters), movement is detected.
